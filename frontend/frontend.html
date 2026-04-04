@@ -1,0 +1,1180 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>AI-CBT – Wirtualny Asystent</title>
+    <style>
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background: #0f172a;
+            color: #e5e7eb;
+        }
+
+        .app {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 16px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 12px;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 2rem;
+        }
+
+        header p {
+            margin: 4px 0 0;
+            color: #9ca3af;
+        }
+
+        .layout {
+            display: grid;
+            grid-template-columns: 1.1fr 1.7fr;
+            gap: 16px;
+        }
+
+        .card {
+            background: #020617;
+            border-radius: 16px;
+            padding: 14px 16px;
+            border: 1px solid #1f2937;
+            box-shadow: 0 10px 25px rgba(15,23,42,0.7);
+        }
+
+        h2 { margin-top: 0; font-size: 1.1rem; }
+        h3 { margin: 10px 0 6px; font-size: 1rem; color: #e5e7eb; }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 8px 10px;
+            margin-top: 3px;
+            border-radius: 10px;
+            border: 1px solid #1f2937;
+            background: #020617;
+            color: #e5e7eb;
+        }
+
+        textarea { resize: vertical; }
+
+        button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 999px;
+            padding: 8px 14px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            margin-top: 6px;
+        }
+
+        button:hover { background: #2563eb; }
+        button:disabled { background: #4b5563; cursor: default; }
+
+        .row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .small-text { font-size: 0.85rem; color: #9ca3af; }
+
+        .pill {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            background: #111827;
+            color: #9ca3af;
+        }
+
+        .assistant-bubble {
+            margin-top: 8px;
+            background: linear-gradient(135deg, #111827, #020617);
+            border-radius: 16px;
+            padding: 10px 12px;
+            border: 1px solid #374151;
+            font-size: 0.9rem;
+            line-height: 1.4;
+            min-height: 60px;
+        }
+
+        .affirm-box {
+            margin-top: 10px;
+            padding: 10px 12px;
+            border-radius: 12px;
+            border: 1px solid #1f2937;
+            background: #020617;
+            font-size: 0.9rem;
+        }
+
+        .affirm-box p { margin-top: 6px; }
+
+        .chat-window {
+            border-radius: 12px;
+            border: 1px solid #111827;
+            background: #020617;
+            padding: 10px;
+            height: 260px;
+            overflow-y: auto;
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+        }
+
+        .chat-msg {
+            margin-bottom: 8px;
+            max-width: 80%;
+            padding: 6px 10px;
+            border-radius: 10px;
+        }
+
+        .chat-msg.user {
+            margin-left: auto;
+            background: #1d4ed8;
+        }
+
+        .chat-msg.bot {
+            margin-right: auto;
+            background: #111827;
+            border: 1px solid #1f2937;
+        }
+
+        .chat-input-row {
+            display: flex;
+            gap: 8px;
+            align-items: stretch;
+        }
+
+        #cbt_input {
+            flex: 1;
+            min-height: 50px;
+            max-height: 150px;
+        }
+
+        .hint { font-size: 0.8rem; color: #9ca3af; margin-top: 4px; }
+
+        .section {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #111827;
+        }
+
+        .info-box {
+            margin-top: 6px;
+            padding: 8px 10px;
+            border-radius: 10px;
+            background: #020617;
+            border: 1px solid #111827;
+            font-size: 0.9rem;
+            white-space: pre-wrap;
+        }
+
+        ul {
+            padding-left: 18px;
+            margin: 6px 0;
+            font-size: 0.9rem;
+        }
+
+        ul li { margin-bottom: 4px; }
+
+        .selfcare-btn {
+            margin-left: 4px;
+            padding: 2px 10px;
+            font-size: 0.8rem;
+        }
+
+        /* ====== Tabs ====== */
+        .tabs {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin: 6px 0 12px;
+            padding: 10px;
+            border: 1px solid rgba(255,255,255,.08);
+            border-radius: 12px;
+            background: rgba(255,255,255,.04);
+        }
+        .tab-btn {
+            cursor: pointer;
+            border: 1px solid rgba(255,255,255,.10);
+            background: rgba(255,255,255,.06);
+            color: inherit;
+            padding: 8px 12px;
+            border-radius: 999px;
+            font-weight: 600;
+            margin-top: 0;
+        }
+        .tab-btn:hover { background: rgba(255,255,255,.10); }
+        .tab-btn.active {
+            background: rgba(59,130,246,.35);
+            border-color: rgba(59,130,246,.6);
+        }
+        .tab-section { display: none; }
+        .tab-section.active { display: block; }
+
+        /* ====== Start (Landing) ====== */
+        .landing {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            background:
+                radial-gradient(900px 500px at 15% 20%, rgba(59,130,246,.25), transparent 50%),
+                radial-gradient(800px 500px at 85% 30%, rgba(34,197,94,.18), transparent 55%),
+                #0b1220;
+        }
+
+        .landing-card {
+            width: min(980px, 100%);
+            border: 1px solid rgba(255,255,255,.10);
+            background: rgba(2,6,23,.92);
+            border-radius: 22px;
+            padding: 22px;
+            box-shadow: 0 24px 80px rgba(0,0,0,.45);
+        }
+
+        .landing-grid {
+            display: grid;
+            grid-template-columns: 1.35fr 1fr;
+            gap: 16px;
+        }
+
+        .landing h1 {
+            margin: 0 0 10px;
+            font-size: 2.2rem;
+            letter-spacing: -0.02em;
+        }
+
+        .landing p {
+            margin: 0;
+            color: #cbd5e1;
+            line-height: 1.6;
+        }
+
+        .landing .muted {
+            color: #94a3b8;
+            font-size: 0.92rem;
+        }
+
+        .feature-list {
+            margin: 12px 0 0;
+            padding: 0;
+            list-style: none;
+            display: grid;
+            gap: 10px;
+        }
+
+        .feature {
+            border: 1px solid rgba(255,255,255,.08);
+            background: rgba(255,255,255,.04);
+            border-radius: 14px;
+            padding: 10px 12px;
+        }
+
+        .feature b {
+            display: block;
+            margin-bottom: 2px;
+        }
+
+        .badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 10px;
+            border-radius: 999px;
+            border: 1px solid rgba(255,255,255,.10);
+            background: rgba(255,255,255,.05);
+            color: #cbd5e1;
+            font-size: .88rem;
+            white-space: nowrap;
+        }
+
+        .landing-actions {
+            margin-top: 14px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .landing-actions button {
+            padding: 10px 16px;
+            font-size: 0.95rem;
+        }
+
+        .ghost-btn {
+            background: rgba(255,255,255,.06);
+            border: 1px solid rgba(255,255,255,.12);
+        }
+
+        .ghost-btn:hover { background: rgba(255,255,255,.10); }
+
+        .disclaimer {
+            margin-top: 12px;
+            padding: 10px 12px;
+            border-radius: 14px;
+            border: 1px solid rgba(255,255,255,.10);
+            background: rgba(239,68,68,.08);
+            color: #fecaca;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .landing-right {
+            border: 1px solid rgba(255,255,255,.08);
+            background: rgba(255,255,255,.04);
+            border-radius: 18px;
+            padding: 14px;
+        }
+
+        .landing-right h3 {
+            margin: 0 0 8px;
+            font-size: 1rem;
+            color: #e5e7eb;
+        }
+
+        .kv {
+            display: grid;
+            grid-template-columns: 120px 1fr;
+            gap: 8px 10px;
+            font-size: 0.92rem;
+            color: #cbd5e1;
+        }
+
+        .kv .k { color: #94a3b8; }
+
+        @media (max-width: 900px) {
+            .layout { grid-template-columns: 1fr; }
+            .landing-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- ====== START / LANDING PAGE ====== -->
+<div class="landing" id="start_page">
+    <div class="landing-card">
+        <div class="landing-grid">
+            <div>
+                <h1 id="landing_title">Witaj w AI-CBT</h1>
+                <p id="landing_desc">
+                    AI-CBT to aplikacja wspierająca ćwiczenia terapii poznawczo-behawioralnej (CBT).
+                    Pomaga w porządkowaniu myśli, monitorowaniu nastroju oraz budowaniu zdrowych nawyków
+                    poprzez proste narzędzia, takie jak dzienniczek emocji, raporty i self-care.
+                </p>
+
+                <ul class="feature-list" id="landing_features">
+                    <li class="feature">
+                        <b id="landing_f1_t">Rozmowa CBT</b>
+                        <span id="landing_f1_d">Krótka sesja wspierająca: nazwanie problemu, praca z myślami i propozycje kroków.</span>
+                    </li>
+                    <li class="feature">
+                        <b id="landing_f2_t">Dzienniczek nastroju</b>
+                        <span id="landing_f2_d">Zapisuj ocenę (1–5), emocję i notatkę – budujesz dane do autorefleksji.</span>
+                    </li>
+                    <li class="feature">
+                        <b id="landing_f3_t">Raport tygodniowy</b>
+                        <span id="landing_f3_d">Zobacz wpisy z tygodnia w tabeli + szybkie podsumowanie.</span>
+                    </li>
+                    <li class="feature">
+                        <b id="landing_f4_t">Self-care</b>
+                        <span id="landing_f4_d">Sugestie działań i Twoja lista zadań do odhaczania.</span>
+                    </li>
+                </ul>
+
+                <div class="badges">
+                    <span class="badge">⚙️ FastAPI</span>
+                    <span class="badge">🗄️ SQLite</span>
+                    <span class="badge">🌐 HTML/CSS/JS</span>
+                    <span class="badge">🧠 CBT tools</span>
+                </div>
+
+                <div class="disclaimer" id="landing_disclaimer"></div>
+
+                <div class="landing-actions">
+                    <button id="enter_app_btn">Rozpocznij korzystanie</button>
+                    <button class="ghost-btn" id="skip_disclaimer_btn">Przejdź do aplikacji</button>
+
+                    <div style="display:flex; align-items:center; gap:8px; margin-left:auto; flex-wrap:wrap;">
+                        <span class="muted" id="landing_lang_label">Język:</span>
+                        <select id="landing_lang" style="width:auto; min-width:160px;">
+                            <option value="pl">Polski</option>
+                            <option value="en">English</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="muted" id="landing_hint" style="margin-top:10px;">
+                    Wybór języka dotyczy całej aplikacji.
+                </div>
+            </div>
+
+            <div class="landing-right">
+                <h3 id="landing_info_title">Informacje o projekcie</h3>
+                <div class="kv">
+                    <div class="k" id="landing_k1">Cel</div><div id="landing_v1">Wsparcie ćwiczeń CBT: rozmowa, monitoring nastroju, raporty.</div>
+                    <div class="k" id="landing_k2">Moduły</div><div id="landing_v2">CBT chat • mood diary • weekly report • self-care • affirmations</div>
+                    <div class="k" id="landing_k3">Dane</div><div id="landing_v3">Zapisy w bazie SQLite (lokalnie).</div>
+                    <div class="k" id="landing_k4">Uruchomienie</div><div><span class="pill">uvicorn main:app --reload</span></div>
+                    <div class="k" id="landing_k5">Adres API</div><div><span class="pill">http://127.0.0.1:8000</span></div>
+                </div>
+                <div style="margin-top:12px; border-top:1px solid rgba(255,255,255,.08); padding-top:12px;">
+                    <p class="muted" id="landing_tip" style="margin:0;">
+                        Tip: Jeżeli backend nie działa, w aplikacji pojawią się komunikaty o błędach.
+                        Najpierw uruchom serwer FastAPI.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="app">
+    <header>
+        <h1 id="ui_title">Twój wirtualny asystent AI-CBT</h1>
+        <p id="ui_subtitle">CBT • nastrój • afirmacje • self-care</p>
+    </header>
+
+    <div class="layout">
+        <!-- LEFT -->
+        <div class="card">
+            <h2 id="ui_user_h2">Użytkownik</h2>
+
+            <label>
+                <span id="ui_name_label">Imię:</span>
+                <input id="user_name" placeholder="Ania">
+            </label>
+
+            <label>
+                <span id="ui_lang_label">Język:</span>
+                <select id="lang">
+                    <option value="pl">Polski</option>
+                    <option value="en">English</option>
+                </select>
+            </label>
+
+            <div class="row">
+                <button id="start_session_btn">Start sesji CBT</button>
+                <span class="small-text"><span id="ui_session_id_label">ID sesji:</span> <span id="session_id" class="pill">brak</span></span>
+            </div>
+
+            <div class="assistant-bubble" id="assistant_bubble">
+                Cześć! Jestem Twoim wirtualnym asystentem. Ustaw imię, wybierz język i rozpocznij sesję CBT. 💛
+            </div>
+
+            <div class="affirm-box">
+                <div class="row" style="justify-content: space-between; align-items: center;">
+                    <h2 id="ui_aff_h2" style="margin:0;">Afirmacja dnia</h2>
+                    <button id="affirm_btn">Odśwież</button>
+                </div>
+                <p id="affirm_text" class="small-text">
+                    Jeszcze nie pobrano afirmacji. Kliknij „Odśwież”.
+                </p>
+            </div>
+        </div>
+
+        <!-- RIGHT -->
+        <div class="card">
+            <!-- Tabs -->
+            <div class="tabs">
+                <button class="tab-btn active" data-tab="chat" id="tab_chat">Chat CBT</button>
+                <button class="tab-btn" data-tab="mood" id="tab_mood">Dzienniczek</button>
+                <button class="tab-btn" data-tab="weekly" id="tab_weekly">Raport</button>
+                <button class="tab-btn" data-tab="selfcare" id="tab_selfcare">Self-care</button>
+            </div>
+
+            <!-- CHAT TAB -->
+            <div class="tab-section active" data-tab="chat">
+                <h2 id="ui_chat_h2">Rozmowa CBT</h2>
+
+                <div class="chat-window" id="cbt_chat">
+                    <div class="small-text" id="ui_chat_empty">Wiadomości z sesji CBT pojawią się tutaj.</div>
+                </div>
+
+                <div class="chat-input-row">
+                    <textarea id="cbt_input" placeholder="Napisz, co Cię martwi..."></textarea>
+                    <button id="send_msg_btn">Wyślij</button>
+                </div>
+                <div class="hint" id="ui_hint">
+                    Najpierw kliknij „Start sesji CBT”. Enter wysyła wiadomość (Shift+Enter – nowa linia).
+                </div>
+            </div>
+
+            <!-- MOOD TAB -->
+            <div class="tab-section" data-tab="mood">
+                <h2 id="ui_mood_h2">Dzienniczek nastroju</h2>
+                <div class="row">
+                    <label style="flex:1;">
+                        <span id="ui_rating_label">Ocena (1–5):</span>
+                        <input type="number" min="1" max="5" id="mood_rating" value="3">
+                    </label>
+                    <label style="flex:2;">
+                        <span id="ui_emotion_label">Emocja:</span>
+                        <input id="mood_emotion" placeholder="np. smutek, lęk, radość">
+                    </label>
+                </div>
+                <label>
+                    <span id="ui_note_label">Notatka:</span>
+                    <input id="mood_note" placeholder="Co wpłynęło na Twój nastrój?">
+                </label>
+                <button id="mood_btn">Zapisz nastrój</button>
+                <div id="mood_result" class="info-box small-text" style="display:none;"></div>
+            </div>
+
+            <!-- WEEKLY TAB -->
+            <div class="tab-section" data-tab="weekly">
+                <h2 id="ui_weekly_h2">Raport tygodniowy</h2>
+                <button id="weekly_btn">Pobierz raport</button>
+                <div id="weekly_report" class="info-box small-text" style="display:none;"></div>
+            </div>
+
+            <!-- SELFCARE TAB -->
+            <div class="tab-section" data-tab="selfcare">
+                <h2 id="ui_selfcare_h2">Self-care</h2>
+                <button id="selfcare_sugg_btn">Pokaż propozycje od aplikacji</button>
+                <ul id="selfcare_suggestions"></ul>
+
+                <h3 id="ui_own_task_h3">Twoje własne zadanie</h3>
+                <label>
+                    <input id="selfcare_text" placeholder="for example, a 10-minute walk">
+                </label>
+                <button id="selfcare_add_btn">Dodaj zadanie</button>
+
+                <h3 id="ui_your_tasks_h3">Twoje zadania self-care</h3>
+                <ul id="selfcare_user_list"></ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const API = "http://127.0.0.1:8000";
+const assistantBubble = document.getElementById("assistant_bubble");
+
+function getUserName() {
+    return document.getElementById("user_name").value || null;
+}
+function getLang() {
+    return document.getElementById("lang").value;
+}
+
+/* ====== Tabs logic ====== */
+function setTab(tabName) {
+    document.querySelectorAll(".tab-section").forEach(sec => {
+        sec.classList.toggle("active", sec.dataset.tab === tabName);
+    });
+    document.querySelectorAll(".tab-btn").forEach(btn => {
+        btn.classList.toggle("active", btn.dataset.tab === tabName);
+    });
+    try { localStorage.setItem("ai_cbt_tab", tabName); } catch (e) {}
+}
+
+document.querySelectorAll(".tab-btn").forEach(btn => {
+    btn.addEventListener("click", () => setTab(btn.dataset.tab));
+});
+
+(function initTab() {
+    let tab = "chat";
+    try {
+        tab = localStorage.getItem("ai_cbt_tab") || "chat";
+    } catch (e) {}
+    setTab(tab);
+})();
+
+const UI = {
+  pl: {
+    title: "Twój wirtualny asystent AI-CBT",
+    subtitle: "CBT • nastrój • afirmacje • self-care",
+    userH2: "Użytkownik",
+    nameLabel: "Imię:",
+    langLabel: "Język:",
+    startSession: "Start sesji CBT",
+    sessionId: "ID sesji:",
+    assistantHello: "Cześć! Jestem Twoim wirtualnym asystentem. Ustaw imię, wybierz język i rozpocznij sesję CBT. 💛",
+    assistantStarting: "Uruchamiam naszą sesję CBT...",
+    assistantActive: "Sesja CBT jest aktywna. Możesz pisać do mnie po prawej stronie. 💬",
+    assistantNeedStart: "Najpierw kliknij „Start sesji CBT”.",
+    assistantBackendFail: "Nie udało się uruchomić sesji. Sprawdź, czy backend działa.",
+    affH2: "Afirmacja dnia",
+    affRefresh: "Odśwież",
+    affNotLoaded: "Jeszcze nie pobrano afirmacji. Kliknij „Odśwież”.",
+    chatH2: "Rozmowa CBT",
+    chatEmpty: "Wiadomości z sesji CBT pojawią się tutaj.",
+    send: "Wyślij",
+    hint: "Najpierw kliknij „Start sesji CBT”. Enter wysyła wiadomość (Shift+Enter – nowa linia).",
+    cbtPlaceholder: "Napisz, co Cię martwi...",
+    moodH2: "Dzienniczek nastroju",
+    ratingLabel: "Ocena (1–5):",
+    emotionLabel: "Emocja:",
+    emotionPlaceholder: "np. smutek, lęk, radość",
+    noteLabel: "Notatka:",
+    notePlaceholder: "Co wpłynęło na Twój nastrój?",
+    saveMood: "Zapisz nastrój",
+    weeklyH2: "Raport tygodniowy",
+    weeklyBtn: "Pobierz raport",
+    selfcareH2: "Self-care",
+    selfcareSugg: "Pokaż propozycje od aplikacji",
+    ownTask: "Twoje własne zadanie",
+    addTask: "Dodaj zadanie",
+    yourTasks: "Twoje zadania self-care",
+    affLoadFail: "Nie udało się pobrać afirmacji.",
+    tabChat: "Chat CBT",
+    tabMood: "Dzienniczek",
+    tabWeekly: "Raport",
+    tabSelfcare: "Self-care",
+
+    landingTitle: "Witaj w AI-CBT",
+    landingDesc: "AI-CBT to aplikacja wspierająca ćwiczenia terapii poznawczo-behawioralnej (CBT). Pomaga w porządkowaniu myśli, monitorowaniu nastroju oraz budowaniu zdrowych nawyków poprzez dzienniczek emocji, raporty i self-care.",
+    landingLangLabel: "Język:",
+    landingHint: "Wybór języka dotyczy całej aplikacji.",
+    landingBtnStart: "Rozpocznij korzystanie",
+    landingBtnSkip: "Przejdź do aplikacji",
+    landingDisclaimer: "Uwaga: aplikacja ma charakter edukacyjny i wspierający. Nie zastępuje diagnozy ani terapii prowadzonej przez specjalistę. W sytuacji zagrożenia zdrowia lub życia skontaktuj się z pomocą medyczną.",
+
+    lf1t: "Rozmowa CBT",
+    lf1d: "Krótka sesja wspierająca: nazwanie problemu, praca z myślami i propozycje kroków.",
+    lf2t: "Dzienniczek nastroju",
+    lf2d: "Zapisuj ocenę (1–5), emocję i notatkę – budujesz dane do autorefleksji.",
+    lf3t: "Raport tygodniowy",
+    lf3d: "Zobacz wpisy z tygodnia w tabeli + szybkie podsumowanie.",
+    lf4t: "Self-care",
+    lf4d: "Sugestie działań i Twoja lista zadań do odhaczania.",
+
+    infoTitle: "Informacje o projekcie",
+    k1: "Cel", v1: "Wsparcie ćwiczeń CBT: rozmowa, monitoring nastroju, raporty.",
+    k2: "Moduły", v2: "CBT chat • mood diary • weekly report • self-care • affirmations",
+    k3: "Dane", v3: "Zapisy w bazie SQLite (lokalnie).",
+    k4: "Uruchomienie",
+    k5: "Adres API",
+    tip: "Tip: Jeżeli backend nie działa, w aplikacji pojawią się komunikaty o błędach. Najpierw uruchom serwer FastAPI."
+  },
+  en: {
+    title: "Your AI-CBT virtual assistant",
+    subtitle: "CBT • mood • affirmations • self-care",
+    userH2: "User",
+    nameLabel: "Name:",
+    langLabel: "Language:",
+    startSession: "Start CBT session",
+    sessionId: "Session ID:",
+    assistantHello: "Hi! I’m your virtual assistant. Set your name, choose a language, and start a CBT session. 💛",
+    assistantStarting: "Starting CBT session...",
+    assistantActive: "CBT session is active. You can chat with me on the right. 💬",
+    assistantNeedStart: "Click “Start CBT session” first.",
+    assistantBackendFail: "Could not start a session. Please check if the backend is running.",
+    affH2: "Affirmation of the day",
+    affRefresh: "Refresh",
+    affNotLoaded: "Affirmation not loaded yet. Click “Refresh”.",
+    chatH2: "CBT chat",
+    chatEmpty: "CBT session messages will appear here.",
+    send: "Send",
+    hint: "Click “Start CBT session” first. Enter sends (Shift+Enter = new line).",
+    cbtPlaceholder: "Write what's on your mind...",
+    moodH2: "Mood journal",
+    ratingLabel: "Rating (1–5):",
+    emotionLabel: "Emotion:",
+    emotionPlaceholder: "e.g. sadness, anxiety, joy",
+    noteLabel: "Note:",
+    notePlaceholder: "What influenced your mood?",
+    saveMood: "Save mood",
+    weeklyH2: "Weekly report",
+    weeklyBtn: "Get report",
+    selfcareH2: "Self-care",
+    selfcareSugg: "Show app suggestions",
+    ownTask: "Your own task",
+    addTask: "Add task",
+    yourTasks: "Your self-care tasks",
+    affLoadFail: "Could not load affirmation.",
+    tabChat: "CBT chat",
+    tabMood: "Mood journal",
+    tabWeekly: "Weekly report",
+    tabSelfcare: "Self-care",
+
+    landingTitle: "Welcome to AI-CBT",
+    landingDesc: "AI-CBT is an application that supports cognitive-behavioral therapy (CBT) exercises. It helps organize thoughts, track mood, and build healthy habits using a mood journal, weekly reports, and self-care tools.",
+    landingLangLabel: "Language:",
+    landingHint: "This language setting applies to the entire app.",
+    landingBtnStart: "Start using the app",
+    landingBtnSkip: "Go to the app",
+    landingDisclaimer: "Note: this app is for educational and supportive purposes. It does not replace diagnosis or therapy provided by a professional. If you are in danger or crisis, seek immediate medical help.",
+
+    lf1t: "CBT chat",
+    lf1d: "A short supportive session: naming the issue, working with thoughts, and suggesting next steps.",
+    lf2t: "Mood journal",
+    lf2d: "Save a 1–5 rating, an emotion, and a note to build a reflection dataset.",
+    lf3t: "Weekly report",
+    lf3d: "See your weekly entries in a table with a quick summary.",
+    lf4t: "Self-care",
+    lf4d: "Suggested actions and your personal checklist.",
+
+    infoTitle: "Project info",
+    k1: "Goal", v1: "Support CBT exercises: chat, mood tracking, and reports.",
+    k2: "Modules", v2: "CBT chat • mood diary • weekly report • self-care • affirmations",
+    k3: "Data", v3: "Stored locally in SQLite.",
+    k4: "Run",
+    k5: "API",
+    tip: "Tip: If the backend is not running, the app will show errors. Start the FastAPI server first."
+  }
+};
+
+function applyI18n() {
+  const lang = getLang();
+  const t = UI[lang] || UI.pl;
+
+  document.documentElement.lang = lang;
+
+  document.getElementById("ui_title").textContent = t.title;
+  document.getElementById("ui_subtitle").textContent = t.subtitle;
+
+  document.getElementById("ui_user_h2").textContent = t.userH2;
+  document.getElementById("ui_name_label").textContent = t.nameLabel;
+  document.getElementById("ui_lang_label").textContent = t.langLabel;
+
+  document.getElementById("start_session_btn").textContent = t.startSession;
+  document.getElementById("ui_session_id_label").textContent = t.sessionId;
+
+  document.getElementById("ui_aff_h2").textContent = t.affH2;
+  document.getElementById("affirm_btn").textContent = t.affRefresh;
+
+  const affText = document.getElementById("affirm_text");
+  if (!affText.dataset.loaded || affText.dataset.loaded === "0") {
+    affText.textContent = t.affNotLoaded;
+  }
+
+  document.getElementById("ui_chat_h2").textContent = t.chatH2;
+  document.getElementById("ui_chat_empty").textContent = t.chatEmpty;
+  document.getElementById("send_msg_btn").textContent = t.send;
+  document.getElementById("ui_hint").textContent = t.hint;
+  document.getElementById("cbt_input").placeholder = t.cbtPlaceholder;
+
+  document.getElementById("ui_mood_h2").textContent = t.moodH2;
+  document.getElementById("ui_rating_label").textContent = t.ratingLabel;
+  document.getElementById("ui_emotion_label").textContent = t.emotionLabel;
+  document.getElementById("mood_emotion").placeholder = t.emotionPlaceholder;
+  document.getElementById("ui_note_label").textContent = t.noteLabel;
+  document.getElementById("mood_note").placeholder = t.notePlaceholder;
+  document.getElementById("mood_btn").textContent = t.saveMood;
+
+  document.getElementById("ui_weekly_h2").textContent = t.weeklyH2;
+  document.getElementById("weekly_btn").textContent = t.weeklyBtn;
+
+  document.getElementById("ui_selfcare_h2").textContent = t.selfcareH2;
+  document.getElementById("selfcare_sugg_btn").textContent = t.selfcareSugg;
+  document.getElementById("ui_own_task_h3").textContent = t.ownTask;
+  document.getElementById("selfcare_add_btn").textContent = t.addTask;
+  document.getElementById("ui_your_tasks_h3").textContent = t.yourTasks;
+
+  document.getElementById("tab_chat").textContent = t.tabChat;
+  document.getElementById("tab_mood").textContent = t.tabMood;
+  document.getElementById("tab_weekly").textContent = t.tabWeekly;
+  document.getElementById("tab_selfcare").textContent = t.tabSelfcare;
+
+  // Landing texts
+  document.getElementById("landing_title").textContent = t.landingTitle;
+  document.getElementById("landing_desc").textContent = t.landingDesc;
+  document.getElementById("landing_lang_label").textContent = t.landingLangLabel;
+  document.getElementById("landing_hint").textContent = t.landingHint;
+  document.getElementById("enter_app_btn").textContent = t.landingBtnStart;
+  document.getElementById("skip_disclaimer_btn").textContent = t.landingBtnSkip;
+  document.getElementById("landing_disclaimer").textContent = t.landingDisclaimer;
+
+  document.getElementById("landing_f1_t").textContent = t.lf1t;
+  document.getElementById("landing_f1_d").textContent = t.lf1d;
+  document.getElementById("landing_f2_t").textContent = t.lf2t;
+  document.getElementById("landing_f2_d").textContent = t.lf2d;
+  document.getElementById("landing_f3_t").textContent = t.lf3t;
+  document.getElementById("landing_f3_d").textContent = t.lf3d;
+  document.getElementById("landing_f4_t").textContent = t.lf4t;
+  document.getElementById("landing_f4_d").textContent = t.lf4d;
+
+  document.getElementById("landing_info_title").textContent = t.infoTitle;
+  document.getElementById("landing_k1").textContent = t.k1;
+  document.getElementById("landing_v1").textContent = t.v1;
+  document.getElementById("landing_k2").textContent = t.k2;
+  document.getElementById("landing_v2").textContent = t.v2;
+  document.getElementById("landing_k3").textContent = t.k3;
+  document.getElementById("landing_v3").textContent = t.v3;
+  document.getElementById("landing_k4").textContent = t.k4;
+  document.getElementById("landing_k5").textContent = t.k5;
+  document.getElementById("landing_tip").textContent = t.tip;
+
+  const sessionId = document.getElementById("session_id").textContent;
+  if (!sessionId || sessionId === "brak") {
+    assistantBubble.textContent = t.assistantHello;
+  }
+}
+
+function setAssistant(text) {
+    assistantBubble.textContent = text;
+}
+
+function appendChat(role, text) {
+    const box = document.getElementById("cbt_chat");
+    const div = document.createElement("div");
+    div.classList.add("chat-msg", role === "USER" ? "user" : "bot");
+    div.textContent = text;
+    box.appendChild(div);
+    box.scrollTop = box.scrollHeight;
+}
+
+/* ====== Landing language sync ====== */
+function hideStartPage() {
+    const sp = document.getElementById("start_page");
+    if (sp) sp.style.display = "none";
+}
+function setLangEverywhere(lang) {
+    document.getElementById("landing_lang").value = lang;
+    document.getElementById("lang").value = lang;
+    applyI18n();
+    loadAffirmation("random");
+}
+document.getElementById("landing_lang").addEventListener("change", (e) => {
+    setLangEverywhere(e.target.value);
+});
+document.getElementById("enter_app_btn").onclick = () => { hideStartPage(); setTab("chat"); };
+document.getElementById("skip_disclaimer_btn").onclick = () => { hideStartPage(); setTab("chat"); };
+
+// ====== START SESSION ======
+document.getElementById("start_session_btn").onclick = async () => {
+    const t = UI[getLang()] || UI.pl;
+    try {
+        document.getElementById("start_session_btn").disabled = true;
+        setAssistant(t.assistantStarting);
+
+        const res = await fetch(API + "/session", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({
+                user_name: getUserName(),
+                lang: getLang()
+            })
+        });
+
+        if (!res.ok) throw new Error("HTTP " + res.status);
+
+        const data = await res.json();
+        document.getElementById("session_id").textContent = data.session_id;
+        appendChat("BOT", data.message);
+        setAssistant(t.assistantActive);
+        setTab("chat");
+    } catch (e) {
+        console.error(e);
+        setAssistant((UI[getLang()] || UI.pl).assistantBackendFail);
+    } finally {
+        document.getElementById("start_session_btn").disabled = false;
+    }
+};
+
+// ====== SEND CBT MESSAGE ======
+async function sendMessage() {
+    const t = UI[getLang()] || UI.pl;
+    const sessionId = document.getElementById("session_id").textContent;
+    if (!sessionId || sessionId === "brak") {
+        return setAssistant(t.assistantNeedStart);
+    }
+
+    const txt = document.getElementById("cbt_input").value.trim();
+    if (!txt) return;
+
+    document.getElementById("cbt_input").value = "";
+    appendChat("USER", txt);
+
+    try {
+        document.getElementById("send_msg_btn").disabled = true;
+        const res = await fetch(API + "/message", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({ session_id: sessionId, text: txt })
+        });
+        const data = await res.json();
+        appendChat("BOT", data.reply);
+    } catch (e) {
+        console.error(e);
+        appendChat("BOT", "Server error.");
+    } finally {
+        document.getElementById("send_msg_btn").disabled = false;
+    }
+}
+document.getElementById("send_msg_btn").onclick = sendMessage;
+document.getElementById("cbt_input").addEventListener("keydown", e => {
+    if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
+    }
+});
+
+// ====== AFFIRMATION (FIXED) ======
+async function loadAffirmation(mode = "random") {
+    const t = UI[getLang()] || UI.pl;
+    const name = getUserName();
+    const lang = getLang();
+
+    let url = `/affirmation/today?lang=${encodeURIComponent(lang)}&mode=${encodeURIComponent(mode)}&t=${Date.now()}`;
+    if (name) url += `&user_name=${encodeURIComponent(name)}`;
+
+    const el = document.getElementById("affirm_text");
+    el.textContent = (lang === "en") ? "Loading..." : "Ładuję...";
+
+    try {
+        const res = await fetch(API + url, { cache: "no-store" });
+        if (!res.ok) throw new Error("HTTP " + res.status);
+
+        const data = await res.json();
+        el.textContent = data.text ?? t.affLoadFail;
+        el.dataset.loaded = "1";
+    } catch (e) {
+        console.error("Affirmation fetch error:", e);
+        el.textContent = t.affLoadFail;
+        el.dataset.loaded = "0";
+    }
+}
+document.getElementById("affirm_btn").onclick = () => loadAffirmation("random");
+
+// ====== MOOD ======
+document.getElementById("mood_btn").onclick = async () => {
+    const rating = Number(document.getElementById("mood_rating").value);
+    if (!(rating >= 1 && rating <= 5)) {
+        return alert("Mood rating must be 1–5.");
+    }
+    const body = {
+        user_name: getUserName(),
+        rating,
+        emotion: document.getElementById("mood_emotion").value || "none",
+        note: document.getElementById("mood_note").value || null
+    };
+    const box = document.getElementById("mood_result");
+    box.style.display = "block";
+    box.textContent = "Saving...";
+    try {
+        const res = await fetch(API + "/mood", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify(body)
+        });
+        if (!res.ok) {
+            const errText = await res.text();
+            throw new Error(`HTTP ${res.status}: ${errText}`);
+        }
+        const data = await res.json();
+        box.textContent = `Saved (${data.rating}/5, emotion: ${data.emotion}).`;
+    } catch (e) {
+        console.error(e);
+        box.textContent = "Could not save mood: " + (e?.message || e);
+    }
+};
+
+// ====== WEEKLY REPORT (TABLE) ======
+document.getElementById("weekly_btn").onclick = async () => {
+  const name = getUserName();
+  const reportUrl = name
+    ? `/report/weekly?user_name=${encodeURIComponent(name)}`
+    : "/report/weekly";
+
+  const box = document.getElementById("weekly_report");
+  box.style.display = "block";
+  box.textContent = "Loading...";
+
+  const esc = (s) =>
+    String(s ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+
+  try {
+    const repRes = await fetch(API + reportUrl, { cache: "no-store" });
+    if (!repRes.ok) throw new Error(`Report HTTP ${repRes.status}: ${await repRes.text()}`);
+    const rep = await repRes.json();
+
+    const from = rep?.from ? new Date(rep.from) : null;
+    const to = rep?.to ? new Date(rep.to) : null;
+
+    const moodUrl = name
+      ? `/mood?user_name=${encodeURIComponent(name)}`
+      : "/mood";
+
+    const moodRes = await fetch(API + moodUrl, { cache: "no-store" });
+    if (!moodRes.ok) throw new Error(`Mood HTTP ${moodRes.status}: ${await moodRes.text()}`);
+    const moodEntries = await moodRes.json();
+
+    const entries = Array.isArray(moodEntries) ? moodEntries : [];
+    const filtered = entries.filter((e) => {
+      if (!from || !to) return true;
+      const d = new Date(e.created_at || e.date || e.timestamp || 0);
+      return d >= from && d <= to;
+    });
+
+    filtered.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+    let html = "";
+
+    if (rep?.mood) {
+      html += `
+        <div style="margin-bottom:12px; opacity:.9;">
+          <div><b>Period:</b> ${esc(rep.from)} → ${esc(rep.to)}</div>
+          <div><b>Number of entries:</b> ${esc(rep.mood.entries)}</div>
+          <div><b>Average rating:</b> ${esc(rep.mood.average_rating)}</div>
+        </div>
+      `;
+    }
+
+    if (!filtered.length) {
+      box.innerHTML = html + `<div>No entries for this week.</div>`;
+      return;
+    }
+
+    html += `
+      <table style="width:100%; border-collapse:collapse;">
+        <thead>
+          <tr>
+            <th style="border:1px solid #3b3b3b; padding:8px; text-align:left;">Date</th>
+            <th style="border:1px solid #3b3b3b; padding:8px; text-align:left;">Rating</th>
+            <th style="border:1px solid #3b3b3b; padding:8px; text-align:left;">Emotion</th>
+            <th style="border:1px solid #3b3b3b; padding:8px; text-align:left;">Note</th>
+          </tr>
+        </thead>
+        <tbody>
+    `;
+
+    for (const e of filtered) {
+      const dt = new Date(e.created_at || e.date || e.timestamp || 0);
+      html += `
+        <tr>
+          <td style="border:1px solid #3b3b3b; padding:8px;">${esc(dt.toLocaleString())}</td>
+          <td style="border:1px solid #3b3b3b; padding:8px;">${esc(e.rating)}</td>
+          <td style="border:1px solid #3b3b3b; padding:8px;">${esc(e.emotion)}</td>
+          <td style="border:1px solid #3b3b3b; padding:8px;">${esc(e.note || "")}</td>
+        </tr>
+      `;
+    }
+
+    html += `</tbody></table>`;
+    box.innerHTML = html;
+  } catch (e) {
+    console.error(e);
+    box.textContent = "Could not load report: " + (e?.message || e);
+  }
+};
+
+// ====== SELFCARE SUGGESTIONS ======
+document.getElementById("selfcare_sugg_btn").onclick = async () => {
+    const lang = getLang();
+    const ul = document.getElementById("selfcare_suggestions");
+    ul.innerHTML = "<li>Loading...</li>";
+    try {
+        const res = await fetch(API + `/selfcare/suggestions?lang=${encodeURIComponent(lang)}&t=${Date.now()}`, { cache: "no-store" });
+        const data = await res.json();
+        ul.innerHTML = "";
+        data.forEach(item => {
+            const li = document.createElement("li");
+            li.textContent = item.text + " ";
+            const btn = document.createElement("button");
+            btn.textContent = "+";
+            btn.className = "selfcare-btn";
+            btn.onclick = () => addSelfcare(item.text, true);
+            li.appendChild(btn);
+            ul.appendChild(li);
+        });
+        loadSelfcareUserList();
+    } catch (e) {
+        console.error(e);
+        ul.innerHTML = "<li>Could not load suggestions.</li>";
+    }
+};
+
+async function addSelfcare(text, fromSuggestion = false) {
+    if (!text.trim()) return;
+    await fetch(API + "/selfcare", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+            user_name: getUserName(),
+            text: text.trim(),
+            from_suggestion: fromSuggestion
+        })
+    });
+    document.getElementById("selfcare_text").value = "";
+    loadSelfcareUserList();
+}
+
+document.getElementById("selfcare_add_btn").onclick = () => {
+    const text = document.getElementById("selfcare_text").value;
+    addSelfcare(text, false);
+};
+
+async function loadSelfcareUserList() {
+    const name = getUserName();
+    const url = name ? `/selfcare?user_name=${encodeURIComponent(name)}&t=${Date.now()}` : `/selfcare?t=${Date.now()}`;
+    const ul = document.getElementById("selfcare_user_list");
+    ul.innerHTML = "<li>Loading...</li>";
+    try {
+        const res = await fetch(API + url, { cache: "no-store" });
+        const data = await res.json();
+        ul.innerHTML = "";
+        if (!data.length) {
+            ul.innerHTML = "<li>No tasks.</li>";
+            return;
+        }
+        data.forEach(task => {
+            const li = document.createElement("li");
+            li.textContent = task.text + " ";
+
+            const doneBtn = document.createElement("button");
+            doneBtn.textContent = "✔";
+            doneBtn.className = "selfcare-btn";
+            doneBtn.onclick = async () => {
+                await fetch(API + `/selfcare/${task.id}/done`, { method: "POST" });
+                loadSelfcareUserList();
+            };
+
+            const delBtn = document.createElement("button");
+            delBtn.textContent = "🗑";
+            delBtn.className = "selfcare-btn";
+            delBtn.onclick = async () => {
+                await fetch(API + `/selfcare/${task.id}`, { method: "DELETE" });
+                loadSelfcareUserList();
+            };
+
+            li.appendChild(doneBtn);
+            li.appendChild(delBtn);
+            ul.appendChild(li);
+        });
+    } catch (e) {
+        console.error(e);
+        ul.innerHTML = "<li>Could not load tasks.</li>";
+    }
+}
+
+document.getElementById("lang").addEventListener("change", () => {
+  setLangEverywhere(getLang());
+});
+
+// Start UI (sync landing + app)
+setLangEverywhere("pl");
+</script>
+</body>
+</html>

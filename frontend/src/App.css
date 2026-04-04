@@ -1,0 +1,70 @@
+.app-container {
+  display: flex;
+  gap: 1rem;
+  padding: 1rem;
+  font-family: system-ui, sans-serif;
+}
+
+.chat-window {
+  flex: 1;
+  border-radius: 12px;
+  padding: 1rem;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 500px;
+}
+
+.settings-panel {
+  width: 220px;
+  padding: 1rem;
+  border-radius: 12px;
+  background: var(--bg-alt);
+}
+
+.setting-group {
+  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.light {
+  --bg: #ffffff;
+  --bg-alt: #f4f4f4;
+  --text: #000000;
+}
+
+.dark {
+  --bg: #121212;
+  --bg-alt: #1e1e1e;
+  --text: #ffffff;
+}
+
+.messages {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 1rem;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.user {
+  align-self: flex-end;
+  background: #007aff;
+  color: white;
+  padding: 8px 12px;
+  border-radius: 12px 12px 0 12px;
+}
+
+.bot {
+  align-self: flex-start;
+  background: #eaeaea;
+  padding: 8px 12px;
+  border-radius: 12px 12px 12px 0;
+}
+
+.input-bar {
+  display: flex;
+  gap: 0.5rem;
+}
